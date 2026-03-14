@@ -1,0 +1,17 @@
+__pycache__/ 
+*.pyc 
+emotion_text_model/ 
+emotion_classifier.pkl 
+static/uploads/ 
+checkpoint-*/ 
+*.pth 
+emotion_text_model/ 
+style_classifier.pkl 
+emotion_classifier.pkl 
+static/uploads/ 
+checkpoint-*/ 
+*.pth 
+emnist_emotion_dataset/ 
+data/ 
+style_meta.json 
+training_args.bin 

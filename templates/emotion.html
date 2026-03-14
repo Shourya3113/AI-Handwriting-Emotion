@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Handwriting Emotion Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>🧠 Handwriting Emotion Detector</h1>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Predict Emotion</button>
+    </form>
+
+    {% if prediction %}
+        <h2>Prediction: {{ prediction }} ({{ confidence }}%)</h2>
+        <img src="{{ url_for('static', filename=image_path.split('static/')[-1]) }}" alt="Uploaded Image">
+    {% endif %}
+</body>
+</html>

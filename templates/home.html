@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QAI — Emotion Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #f5f5f7;
+    --white:        #ffffff;
+    --border:       rgba(0,0,0,0.08);
+    --border-strong:rgba(0,0,0,0.14);
+    --text:         #1d1d1f;
+    --text-2:       #424245;
+    --text-3:       #6e6e73;
+    --blue:         #0071e3;
+    --blue-light:   #e8f1fb;
+    --happy:        #ff9f0a;
+    --sad:          #0a84ff;
+    --angry:        #ff453a;
+    --stressed:     #30d158;
+    --radius:       18px;
+    --radius-sm:    12px;
+    --shadow:       0 2px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg:    0 8px 40px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.05);
+    --font:         'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    background: rgba(245,245,247,0.82);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+  }
+  .nav-logo { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+  .nav-logo span { color: var(--blue); }
+  .nav-sub  { font-size: 12px; color: var(--text-3); font-weight: 500; }
+
+  /* PAGE */
+  .page { max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; }
+
+  /* HERO */
+  .hero {
+    text-align: center; margin-bottom: 52px;
+    animation: fadeDown 0.55s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero-chip {
+    display: inline-block;
+    background: var(--blue-light); color: var(--blue);
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 5px 13px; border-radius: 980px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 54px);
+    font-weight: 800; letter-spacing: -0.04em; line-height: 1.06;
+  }
+  .hero p {
+    margin-top: 14px; font-size: 17px; font-weight: 400;
+    color: var(--text-3); line-height: 1.55;
+    max-width: 460px; margin-left: auto; margin-right: auto;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(2) { animation-delay: 0.08s; }
+  .card:nth-child(3) { animation-delay: 0.14s; }
+
+  .card-lbl {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 16px;
+  }
+
+  /* DROP ZONE */
+  .drop-zone {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    height: 128px; border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-sm); cursor: pointer;
+    background: var(--bg); margin-bottom: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .drop-zone:hover { border-color: var(--blue); background: var(--blue-light); }
+  .drop-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--blue-light);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .drop-zone:hover .drop-icon { background: rgba(0,113,227,0.2); }
+  .drop-icon svg { width: 18px; height: 18px; stroke: var(--blue); }
+  .drop-lbl { font-size: 14px; font-weight: 500; color: var(--text-2); }
+  .drop-sub { font-size: 12px; color: var(--text-3); }
+  #file-name { font-size: 12px; color: var(--blue); font-weight: 600; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font-family: var(--font); font-weight: 600; border: none;
+    cursor: pointer; border-radius: 980px;
+    transition: all 0.15s ease; letter-spacing: -0.01em;
+  }
+  .btn:active { transform: scale(0.975); }
+  .btn-primary {
+    width: 100%; padding: 14px 24px; font-size: 15px;
+    background: var(--blue); color: #fff;
+  }
+  .btn-primary:hover { background: #0077ed; }
+  .btn-ghost {
+    padding: 9px 18px; font-size: 13px;
+    background: var(--bg); color: var(--text-2);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: #e5e5ea; }
+  .btn-dark {
+    padding: 9px 18px; font-size: 13px;
+    background: #1c1c1e; color: #fff;
+  }
+  .btn-dark:hover { background: #2c2c2e; }
+
+  /* CANVAS */
+  #canvas {
+    display: block; width: 100%; height: 190px;
+    background: var(--bg); border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-strong);
+    cursor: crosshair; touch-action: none;
+  }
+  .canvas-btns { display: flex; gap: 10px; margin-top: 12px; }
+
+  /* OR */
+  .or-row {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--text-3); font-size: 13px; font-weight: 500; margin: 6px 0;
+  }
+  .or-row::before, .or-row::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* LOADER */
+  #loader { display:none; text-align:center; padding: 52px 0; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2.5px solid var(--border-strong);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-lbl { font-size: 14px; color: var(--text-3); font-weight: 500; }
+
+  /* RESULTS */
+  #result-container { display: none; }
+
+  /* EMOTION HERO */
+  .emotion-hero {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    padding: 36px 32px; margin-bottom: 16px;
+    position: relative; overflow: hidden;
+    animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .emotion-hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -60px;
+    width: 260px; height: 260px; border-radius: 50%;
+    background: var(--ec, #ccc); opacity: 0.07;
+    pointer-events: none;
+  }
+  .emotion-lbl {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 8px;
+  }
+  .emotion-name {
+    font-size: clamp(42px, 9vw, 68px);
+    font-weight: 800; letter-spacing: -0.04em; line-height: 1;
+  }
+  .emotion-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 980px; padding: 6px 14px;
+    font-size: 13px; font-weight: 600;
+  }
+  .pill-conf { background: rgba(0,0,0,0.05); color: var(--text-2); }
+  .pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .risk-Low      { background: rgba(52,199,89,0.12);  color: #1a7a35; }
+  .risk-Medium   { background: rgba(255,159,10,0.12); color: #8a4d00; }
+  .risk-High     { background: rgba(255,69,58,0.10);  color: #b0251c; }
+
+  /* 2 col */
+  .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 560px) { .two-up { grid-template-columns: 1fr; } }
+
+  .sec-lbl { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
+
+  /* PROB BARS */
+  .prob-list { display: flex; flex-direction: column; gap: 12px; }
+  .prob-row  { display: grid; grid-template-columns: 68px 1fr 36px; align-items: center; gap: 10px; }
+  .prob-name { font-size: 12px; font-weight: 600; color: var(--text-2); text-transform: capitalize; }
+  .prob-track { height: 4px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+  .prob-fill  { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+  .prob-pct   { font-size: 11px; font-weight: 700; color: var(--text-3); text-align: right; }
+
+  /* FEATURES */
+  .feat-list { display: flex; flex-direction: column; gap: 7px; }
+  .feat-row  {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 13px; background: var(--bg); border-radius: 9px; font-size: 12px;
+  }
+  .feat-k { color: var(--text-3); font-weight: 500; }
+  .feat-v { color: var(--text);   font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* OCR */
+  .ocr-box {
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 18px; font-size: 15px; color: var(--text-2);
+    line-height: 1.7; font-style: italic; min-height: 60px;
+  }
+
+  /* SEGMENTS */
+  .seg { display: flex; justify-content: space-between; align-items: flex-start;
+         gap: 12px; padding: 13px 15px; background: var(--bg);
+         border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+  .seg-txt { color: var(--text-2); flex: 1; }
+  .seg-tag { font-size: 11px; font-weight: 700; text-transform: capitalize;
+             padding: 4px 11px; border-radius: 980px; white-space: nowrap; flex-shrink: 0; }
+  .tag-happy    { background: rgba(255,159,10,0.12); color: #7a4d00; }
+  .tag-sad      { background: rgba(10,132,255,0.10); color: #0051a3; }
+  .tag-angry    { background: rgba(255,69,58,0.10);  color: #b0251c; }
+  .tag-stressed { background: rgba(48,209,88,0.10);  color: #1a7a35; }
+
+  #preview-img { width: 100%; border-radius: var(--radius-sm); display: none; }
+
+  footer { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 48px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">QAI<span>.</span></div>
+  <div class="nav-sub">Handwriting Emotion Analysis</div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-chip">AI · v2.0</div>
+    <h1>Know what your<br>handwriting reveals.</h1>
+    <p>Upload a sample and our model reads emotion through stroke, pressure, spacing, and slant.</p>
+  </div>
+
+  <!-- Upload -->
+  <div class="card">
+    <div class="card-lbl">Upload Image</div>
+    <form id="upload-form">
+      <label for="file-upload" class="drop-zone">
+        <div class="drop-icon">
+          <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 7.5m0 0L7.5 12M12 7.5V18"/></svg>
+        </div>
+        <span class="drop-lbl">Drop image here or click to browse</span>
+        <span class="drop-sub">PNG · JPG · JPEG</span>
+        <span id="file-name"></span>
+      </label>
+      <input id="file-upload" name="file" type="file" style="display:none" accept="image/*">
+      <button type="submit" class="btn btn-primary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+        Analyze Handwriting
+      </button>
+    </form>
+  </div>
+
+  <div class="or-row">or</div>
+
+  <!-- Canvas -->
+  <div class="card">
+    <div class="card-lbl">Draw Handwriting</div>
+    <canvas id="canvas" width="800" height="190"></canvas>
+    <div class="canvas-btns">
+      <button id="clearCanvas" class="btn btn-ghost">Clear</button>
+      <button id="analyzeCanvas" class="btn btn-dark">Analyze Drawing</button>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="spinner"></div>
+    <div class="loader-lbl">Analysing handwriting features…</div>
+  </div>
+
+  <!-- Results -->
+  <div id="result-container">
+
+    <div class="emotion-hero" id="ehero">
+      <div class="emotion-lbl">Detected Emotion</div>
+      <div class="emotion-name" id="ename">—</div>
+      <div class="emotion-pills">
+        <div class="pill pill-conf"><div class="pill-dot" id="pdot"></div><span id="pconf">—</span>% confidence</div>
+        <div class="pill" id="prisk">—</div>
+      </div>
+    </div>
+
+    <div class="two-up">
+      <div class="card" style="animation-delay:.05s">
+        <div class="sec-lbl">Emotion Breakdown</div>
+        <div class="prob-list" id="prob-list"></div>
+      </div>
+      <div class="card" style="animation-delay:.1s">
+        <div class="sec-lbl">Handwriting Features</div>
+        <div class="feat-list" id="feat-list"></div>
+      </div>
+    </div>
+
+    <div class="card" style="animation-delay:.15s">
+      <div class="sec-lbl">Extracted Text</div>
+      <div class="ocr-box" id="ocr-text">—</div>
+    </div>
+
+    <div class="card" id="seg-card" style="display:none;animation-delay:.18s">
+      <div class="sec-lbl">Sentence-level Analysis</div>
+      <div id="seg-list"></div>
+    </div>
+
+    <div class="card" id="prev-card" style="display:none;animation-delay:.2s">
+      <div class="sec-lbl">Input Image</div>
+      <img id="preview-img">
+    </div>
+
+  </div>
+
+  <footer>© 2026 AI Project — AI Enhanced Handwriting Analysis</footer>
+</div>
+
+<script>
+const EC = { happy:'#ff9f0a', sad:'#0a84ff', angry:'#ff453a', stressed:'#30d158' };
+
+/* upload */
+const fi = document.getElementById('file-upload');
+fi.addEventListener('change', () => {
+  document.getElementById('file-name').textContent = fi.files[0]?.name || '';
+});
+document.getElementById('upload-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!fi.files[0]) { alert('Please select an image.'); return; }
+  const fd = new FormData(); fd.append('file', fi.files[0]);
+  await go(() => fetch('/predict', { method:'POST', body:fd }));
+});
+
+/* canvas */
+const cv = document.getElementById('canvas'), cx = cv.getContext('2d');
+let dn = false;
+(function() {
+  const dpr = window.devicePixelRatio||1, r = cv.getBoundingClientRect();
+  cv.width = (r.width||732)*dpr; cv.height = 190*dpr; cx.scale(dpr,dpr);
+})();
+cv.addEventListener('pointerdown', ()=>{ dn=true; cx.beginPath(); });
+cv.addEventListener('pointerup',   ()=> dn=false);
+cv.addEventListener('pointerleave',()=> dn=false);
+cv.addEventListener('pointermove', e => {
+  if (!dn) return;
+  const r = cv.getBoundingClientRect();
+  cx.lineWidth=2; cx.lineCap='round'; cx.lineJoin='round'; cx.strokeStyle='#1d1d1f';
+  cx.lineTo(e.clientX-r.left, e.clientY-r.top); cx.stroke();
+  cx.beginPath(); cx.moveTo(e.clientX-r.left, e.clientY-r.top);
+});
+document.getElementById('clearCanvas').onclick = () => cx.clearRect(0,0,cv.width,cv.height);
+document.getElementById('analyzeCanvas').onclick = () =>
+  go(() => fetch('/predict_canvas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:cv.toDataURL()})}));
+
+/* runner */
+async function go(fn) {
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById('result-container').style.display = 'none';
+  try { render(await (await fn()).json()); }
+  catch(e) { alert('Error: '+e.message); }
+  finally { document.getElementById('loader').style.display = 'none'; }
+}
+
+/* render */
+function render(d) {
+  const rc = document.getElementById('result-container');
+  rc.style.display = 'block';
+  const em = (d.emotion||'unknown').toLowerCase();
+  const c  = EC[em]||'#888';
+
+  /* hero */
+  document.getElementById('ehero').style.setProperty('--ec', c);
+  document.getElementById('ename').textContent = em.charAt(0).toUpperCase()+em.slice(1);
+  document.getElementById('ename').style.color = c;
+  document.getElementById('pdot').style.background = c;
+  document.getElementById('pconf').textContent = d.confidence??'—';
+  const rp = document.getElementById('prisk');
+  rp.textContent = (d.risk||'Low')+' Risk';
+  rp.className = 'pill risk-'+(d.risk||'Low');
+
+  /* probs */
+  const pl = document.getElementById('prob-list'); pl.innerHTML='';
+  Object.entries(d.probabilities||{}).sort((a,b)=>b[1]-a[1]).forEach(([e,p])=>{
+    pl.innerHTML+=`<div class="prob-row">
+      <span class="prob-name">${e}</span>
+      <div class="prob-track"><div class="prob-fill" style="width:${p}%;background:${EC[e]||'#888'}"></div></div>
+      <span class="prob-pct">${p}%</span>
+    </div>`;
+  });
+
+  /* features */
+  const fl = document.getElementById('feat-list'); fl.innerHTML='';
+  Object.entries(d.feature_summary||{}).forEach(([k,v])=>{
+    fl.innerHTML+=`<div class="feat-row"><span class="feat-k">${k}</span><span class="feat-v">${v}</span></div>`;
+  });
+
+  /* ocr */
+  document.getElementById('ocr-text').textContent = d.text||'No text detected.';
+
+  /* segments */
+  const sc = document.getElementById('seg-card'), sl = document.getElementById('seg-list');
+  if ((d.segments||[]).length) {
+    sc.style.display='block'; sl.innerHTML='';
+    d.segments.forEach((s,i)=>{
+      sl.innerHTML+=`<div class="seg"><span class="seg-txt">${i+1}. ${s.text}</span><span class="seg-tag tag-${s.emotion}">${s.emotion}</span></div>`;
+    });
+  } else sc.style.display='none';
+
+  /* preview */
+  const pc=document.getElementById('prev-card'), pi=document.getElementById('preview-img');
+  if (d.image_url) { pi.src=d.image_url; pi.style.display='block'; pc.style.display='block'; }
+  else pc.style.display='none';
+
+  rc.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion Result - Quantum & AI Detection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="nav-logo"> Quantum AI</div>
+      <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="result fade-in">
+      <div class="container">
+        <div class="content-card">
+          <h2>Your Emotion Analysis</h2>
+
+          {% if image_url %}
+            <img src="{{ image_url }}" alt="Uploaded Handwriting" class="preview-img">
+          {% endif %}
+
+          <p>Based on our analysis, the detected emotional state is:</p>
+          <h1 class="emotion-result">{{ emotion|capitalize }}</h1>
+
+          <a href="{{ url_for('home') }}" class="btn">← Analyze Another</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 Quantum AI Project — Precision meets emotion.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple script to ensure the fade-in works on page load for the result
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.fade-in').classList.add('visible');
+    });
+  </script>
+
+</body>
+</html>
